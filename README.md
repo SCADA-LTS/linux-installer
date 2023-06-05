@@ -12,7 +12,8 @@
 The installer requires an internet connection. The first run will take longer due to the need to download and install MySQL 8.0 CE database server, MySQL 8.0 shell and JDK 11.
 
 Start the database server first, then tomcat:
-1. Granting permissions to execute:
+1. Download and unzip to linux-installer-1.0.0 dir: [linux-installer-1.0.0.zip](https://github.com/SCADA-LTS/linux-installer/releases/download/v1.0.0/linux-installer-1.0.0.zip)
+2. Granting permissions to execute, in linux-installer-1.0.0 execute:
 ````
 chmod +x mysql_start.sh
 chmod +x tomcat_start.sh
@@ -20,11 +21,11 @@ chmod +x tomcat64/bin/catalina.sh
 chmod +x mysql/mysql_install.sh
 chmod +x java/java_install.sh
 ````
-2. Start MySQL server:
+3. Start MySQL server:
 ````
 ./mysql_start.sh
 ````
-3. Start Tomcat with Scada-LTS:
+4. Start Tomcat with Scada-LTS:
 ````
 ./tomcat_start.sh
 ````
