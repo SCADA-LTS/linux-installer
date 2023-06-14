@@ -43,7 +43,9 @@ if [ ! -d "$CLIENT_BIN_DIR" ]; then
     rm -f $SHELL_MYSQL_TAR_GZ_FILE
 fi
 
-mkdir -p $DATADIR
-cd $SERVER_BIN_DIR
-./mysqld --defaults-file=$MY_CNF --initialize-insecure --datadir $DATADIR --user=$USER --init-file=$INIT_SCHEMA --console 
+if [ ! -d "$DATADIR" ]; then
+  mkdir -p $DATADIR
+  cd $SERVER_BIN_DIR
+  ./mysqld --defaults-file=$MY_CNF --initialize-insecure --datadir $DATADIR --user=$USER --init-file=$INIT_SCHEMA --console
+fi
 
