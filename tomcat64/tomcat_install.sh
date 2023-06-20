@@ -84,4 +84,3 @@ if [ ! -d "${SCADA_LTS_HOME}" ]; then
     fi
     echo "Tomcat version ${TOMCAT_VERSION} configured"
 fi
-$CATALINA_HOME/bin/catalina.sh run
