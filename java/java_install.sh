@@ -1,12 +1,12 @@
 #!/bin/bash
-export JAVA_HOME="$1"
+export JAVA_HOME="$1/jdk"
 JAVA_BIN_DIR="$JAVA_HOME/bin"
 
 JAVA_VERSION="11.0.19"
 JAVA_UPDATE="7"
 
 JAVA_VERSION_ENCODED="${JAVA_VERSION}%2B${JAVA_UPDATE}"
-JAVA_VERSION="${JAVA_VERSION}_${JAVA_UPDATE}"
+JAVA_FULL_VERSION="${JAVA_VERSION}_${JAVA_UPDATE}"
 JDK_DEST="jdk-${JAVA_VERSION}+${JAVA_UPDATE}"
 
 JAVA_ARCH=""
@@ -24,8 +24,9 @@ else
     echo "x86 architecture, 32-bit is not supported"
 fi
 
-if [ ! -d "$JAVA_BIN_DIR" ] && [! -z ${JAVA_ARCH} ]; then
-    JDK_TAR_GZ_FILE=${JAVA_ARCH}${JAVA_VERSION}".tar.gz"
+if [ ! -d ${JAVA_BIN_DIR} ] && [ ! -z ${JAVA_ARCH} ]; then
+    JDK_TAR_GZ_FILE=${JAVA_ARCH}${JAVA_FULL_VERSION}".tar.gz"
+    mkdir -p $JAVA_HOME
     cd "$JAVA_HOME"
     wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-${JAVA_VERSION_ENCODED}/${JDK_TAR_GZ_FILE}
     tar -xvf ${JDK_TAR_GZ_FILE} -C "$JAVA_HOME"

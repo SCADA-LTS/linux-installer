@@ -26,10 +26,11 @@ if [ ! -d "$CATALINA_BIN_DIR" ]; then
     TOMCAT_MINOR_VERSION=0
     TOMCAT_PATCH_VERSION=76
     TOMCAT_VERSION="${TOMCAT_MAJOR_VERSION}.${TOMCAT_MINOR_VERSION}.${TOMCAT_PATCH_VERSION}"
-    TOMCAT_DEST = "apache-tomcat-${TOMCAT_VERSION}"
+    TOMCAT_DEST="apache-tomcat-${TOMCAT_VERSION}"
     TOMCAT_TAR_GZ_FILE="${TOMCAT_DEST}.tar.gz"
 
-    cd "$CATALINA_HOME"
+    mkdir -p $CATALINA_HOME
+    cd $CATALINA_HOME
     wget "https://archive.apache.org/dist/tomcat/tomcat-${TOMCAT_MAJOR_VERSION}/v${TOMCAT_VERSION}/bin/${TOMCAT_TAR_GZ_FILE}"
     tar -xvf ${TOMCAT_TAR_GZ_FILE} -C "$CATALINA_HOME"
     cd "$CATALINA_HOME/${TOMCAT_DEST}"
@@ -41,23 +42,33 @@ if [ ! -d "$CATALINA_BIN_DIR" ]; then
 fi
 
 if [ ! -d "${SCADA_LTS_HOME}" ]; then
+
+    CATALINA_CONTEXT_XML=${SCADA_LTS_HOME}/META-INF/context.xml
     cd "${CATALINA_BASE}"
     unzip "Scada-LTS.war" -d ${SCADA_LTS_HOME}
-    cp -rf context.xml ${SCADA_LTS_HOME}/META-INF/context.xml
+    cp -rf context.xml ${CATALINA_CONTEXT_XML}
     cp -rf ${CATALINA_BASE}/lib/*.jar ${CATALINA_LIB}
 
-    if [${CATALINA_PORT} == -1]; then
-        echo -n "Port: "
+    if [[ ${CATALINA_PORT} -eq -1 ]]; then
+        echo -n "[Apache Tomcat Server] Enter port: "
         read -r CATALINA_PORT
-        sed -i "s/'port="8080"'/'port=${CATALINA_PORT}'/" ${CATALINA_SERVER_XML}
+        sed -i "s/8080/${CATALINA_PORT}/" ${CATALINA_SERVER_XML}
     fi
 
-    if [-z ${CATALINA_USERNAME}] || [-z ${CATALINA_PASSWORD}]; then
-        echo -n "User: "
-        read -r ${CATALINA_USERNAME}
-        echo -n "Password: "
-        read -r ${CATALINA_PASSWORD}
-        sed -i "s/'</tomcat-users>'/'<role rolename="monitoring"/><role rolename="manager"/><role rolename="manager-gui"/><role rolename="admin"/><user username="${CATALINA_USERNAME}" password="${CATALINA_PASSWORD}" roles="admin,manager,manager-gui,monitoring"/></tomcat-users>'/" ${CATALINA_TOMCAT_USERS_XML}
+    DATABASE_PORT=-1
+
+    if [[ ${DATABASE_PORT} -eq -1 ]]; then
+        echo -n "[Apache Tomcat Server] Enter server database port: "
+        read -r DATABASE_PORT
+        sed -i "s/localhost:3308/localhost:${DATABASE_PORT}/" ${CATALINA_CONTEXT_XML}
+    fi
+
+    if [ -z ${CATALINA_USERNAME} ] || [ -z ${CATALINA_PASSWORD} ]; then
+        echo -n "[Apache Tomcat Server] Enter username: "
+        read -r CATALINA_USERNAME
+        echo -n "[Apache Tomcat Server] Enter password: "
+        read -r CATALINA_PASSWORD
+        sed -i "s/<\/tomcat-users>/<role rolename=\"monitoring\"\/><role rolename=\"manager\"\/><role rolename=\"manager-gui\"\/><role rolename=\"admin\"\/><user username=\"${CATALINA_USERNAME}\" password=\"${CATALINA_PASSWORD}\" roles=\"admin,manager,manager-gui,monitoring\"\/><\/tomcat-users>/" ${CATALINA_TOMCAT_USERS_XML}
     fi
     echo "Tomcat version ${TOMCAT_VERSION} configured"
 fi

@@ -2,13 +2,13 @@
 export MYSQL_HOME="`pwd`/mysql/server"
 export MYSQL_BASE="`pwd`/mysql"
 
-export MY_CNF="$MYSQL_BASE/my.cnf"
+export MY_CNF="$MYSQL_HOME/my.cnf"
 export BINDIR="$MYSQL_HOME/bin"
 export DATADIR="$MYSQL_HOME/data"
 
 export MYSQLD_PID="$DATADIR/mysqld.pid"
 
-if [ ! -d "$DATADIR" ]; then
+if [ ! -d $DATADIR ]; then
     $MYSQL_BASE/mysql_install.sh $MYSQL_BASE
 fi
 
