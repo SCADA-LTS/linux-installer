@@ -3,8 +3,8 @@ export MYSQL_HOME="$1/server/"
 export SHELL_HOME="$1/client/"
 export DATADIR="$MYSQL_HOME/data"
 
-USER="root"
 INIT_SCHEMA="$1/scadalts.sql"
+INIT_SCHEMA_TMP="$MYSQL_HOME/scadalts.sql"
 MY_CNF="$1/my.cnf"
 
 SERVER_BIN_DIR="$MYSQL_HOME/bin"
@@ -13,6 +13,9 @@ SERVER_LOG_DIR="$MYSQL_HOME/log"
 CLIENT_BIN_DIR="$SHELL_HOME/bin"
 
 MYSQL_PORT=-1
+MYSQL_USERNAME=""
+MYSQL_PASSWORD=""
+MYSQL_ROOT_PASSWORD=""
 
 MACHINE_TYPE=`uname -m`
 
@@ -52,10 +55,26 @@ if [ ! -d ${SERVER_BIN_DIR} ] && [ ! -z ${SERVER_MYSQL_DEST} ]; then
     rm -f ${SERVER_MSQL_TAR_FILE}
     rm -f *.tar.xz
     cp -ar ${MY_CNF} $MYSQL_HOME
+    cp -ar ${INIT_SCHEMA} ${INIT_SCHEMA_TMP}
     if [ ${MYSQL_PORT} -eq -1 ]; then
         echo -n "[MySQL Community Server] Enter port: "
         read -r MYSQL_PORT
         echo "port = ${MYSQL_PORT}" >> $MYSQL_HOME/my.cnf
+    fi
+    if [ -z ${MYSQL_USERNAME} ]; then
+        echo -n "[MySQL Community Server] Enter username: "
+        read -r MYSQL_USERNAME
+        echo "user = ${MYSQL_USERNAME}" >> $MYSQL_HOME/my.cnf
+    fi
+    if [ -z ${MYSQL_PASSWORD} ]; then
+        echo -n "[MySQL Community Server] Enter password: "
+        read -r MYSQL_PASSWORD
+        echo $'\n'"CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'localhost' IDENTIFIED BY '${MYSQL_PASSWORD}';"$'\n'"GRANT ALL ON scadalts.* TO '${MYSQL_USERNAME}'@'localhost';"$'\n'"FLUSH PRIVILEGES;" >> ${INIT_SCHEMA_TMP}
+    fi
+    if [ -z ${MYSQL_ROOT_PASSWORD} ]; then
+        echo -n "[MySQL Community Server] Enter root password: "
+        read -r MYSQL_ROOT_PASSWORD
+        echo $'\n'"ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';" >> ${INIT_SCHEMA_TMP}
     fi
     mkdir -p ${SERVER_LOG_DIR}
     echo "MySQL Community Server version ${MYSQL_VERSION} installed"
@@ -82,6 +101,5 @@ mkdir -p ${SERVER_TMP_DIR}
 if [ ! -d "$DATADIR" ]; then
   mkdir -p $DATADIR
   cd ${SERVER_BIN_DIR}
-  ./mysqld --defaults-file="$MYSQL_HOME/my.cnf" --initialize-insecure --datadir $DATADIR --user="${USER}" --init-file="${INIT_SCHEMA}" --console
+  ./mysqld --defaults-file="$MYSQL_HOME/my.cnf" --initialize-insecure --datadir $DATADIR --user="${MYSQL_USERNAME}" --init-file="${INIT_SCHEMA_TMP}" --console
 fi
-
