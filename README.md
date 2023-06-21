@@ -6,7 +6,7 @@
 | Java | 11.0.19+7 | Base programic language |
 | Server MySQL CE | 8.0.33 | Database server for data persistence |
 | Shell MySQL | 8.0.33 | Database client |
-| Apache Tomcat | 9.0.75 | Application server |
+| Apache Tomcat | 9.0.76 | Application server |
 
 ## Instruction 
 The installer requires an internet connection. The first run will take longer due to the need to download and install MySQL 8.0 CE database server, MySQL 8.0 shell and JDK 11.
