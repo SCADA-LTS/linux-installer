@@ -1,14 +1,11 @@
 #!/bin/bash
-export JAVA_HOME="$1/jdk"
+export JAVA_HOME="$1"
+JAVA_VERSION="$2"
+JAVA_UPDATE="$3"
 JAVA_BIN_DIR="$JAVA_HOME/bin"
-
-JAVA_VERSION="11.0.19"
-JAVA_UPDATE="7"
-
 JAVA_VERSION_ENCODED="${JAVA_VERSION}%2B${JAVA_UPDATE}"
 JAVA_FULL_VERSION="${JAVA_VERSION}_${JAVA_UPDATE}"
 JDK_DEST="jdk-${JAVA_VERSION}+${JAVA_UPDATE}"
-
 JAVA_ARCH=""
 MACHINE_TYPE=`uname -m`
 SERVER_MYSQL_DEST=""
@@ -35,5 +32,6 @@ if [ ! -d ${JAVA_BIN_DIR} ] && [ ! -z ${JAVA_ARCH} ]; then
     cd ..
     rm -rf ${JDK_DEST}
     rm -f ${JDK_TAR_GZ_FILE}
+    echo "JDK version ${JAVA_FULL_VERSION} installed"
 fi
 

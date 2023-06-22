@@ -1,11 +1,34 @@
 #!/bin/bash
-JAVA_BASE="`pwd`/java"
-CATALINA_BASE="`pwd`/tomcat64"
+JAVA_VERSION="11.0.19"
+JAVA_UPDATE=7
+
+TOMCAT_MAJOR_VERSION=9
+TOMCAT_MINOR_VERSION=0
+TOMCAT_PATCH_VERSION=76
+
+INSTALLER_HOME=$(dirname "$(realpath "$0")")
+JAVA_BASE="${INSTALLER_HOME}/java"
+CATALINA_BASE="${INSTALLER_HOME}/tomcat64"
+
+export JAVA_HOME="${JAVA_BASE}/jdk"
 export CATALINA_HOME="${CATALINA_BASE}/server"
+
+JAVA_BIN_DIR="$JAVA_HOME/bin"
 CATALINA_BIN_DIR="$CATALINA_HOME/bin"
 
+CATALINA_WEBAPPS="$CATALINA_HOME/webapps"
+SCADA_LTS_HOME="${CATALINA_WEBAPPS}/Scada-LTS"
+
+if [ ! -d "${JAVA_BIN_DIR}" ]; then
+    ${JAVA_BASE}/java_install.sh $JAVA_HOME ${JAVA_VERSION} ${JAVA_UPDATE}
+fi
+
 if [ ! -d "${CATALINA_BIN_DIR}" ]; then
-    $CATALINA_BASE/tomcat_install.sh ${JAVA_BASE} ${CATALINA_BASE}
+    $CATALINA_BASE/tomcat_install.sh $CATALINA_HOME ${TOMCAT_MAJOR_VERSION} ${TOMCAT_MINOR_VERSION} ${TOMCAT_PATCH_VERSION}
+fi
+
+if [ ! -d "${SCADA_LTS_HOME}" ]; then
+    $CATALINA_BASE/tomcat_config.sh $CATALINA_HOME
 fi
 
 $CATALINA_HOME/bin/catalina.sh run
