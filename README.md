@@ -11,7 +11,7 @@
 ## Instruction 
 The installer requires an internet connection. The first run will take longer due to the need to download and install MySQL 8.0 CE database server, MySQL 8.0 shell and JDK 11.
 
-1. Download and unzip to linux-installer-1.x.x dir: [linux-installer-1.1.2.zip](https://github.com/SCADA-LTS/linux-installer/releases/download/v1.1.2/linux-installer-1.1.2.zip)
+1. Download and unzip to linux-installer-1.x.x dir: [linux-installer-1.2.0.zip](https://github.com/SCADA-LTS/linux-installer/releases/download/v1.2.0/linux-installer-1.2.0.zip)
 2. You may need to set execute permissions, in linux-installer-1.1.2 execute:
 ````
 chmod +x mysql_start.sh
