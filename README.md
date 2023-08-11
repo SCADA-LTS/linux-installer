@@ -12,16 +12,33 @@
 ## Instruction 
 The installer requires an internet connection. The first run will take longer due to the need to download and install MySQL 8.0 CE database server, MySQL 8.0 shell and JDK 11.
 
-1. Download and unzip to linux-installer-1.x.x dir: [linux-installer-1.2.0.zip](https://github.com/SCADA-LTS/linux-installer/releases/download/v1.2.0/linux-installer-1.2.0.zip)
-2. Start MySQL server:
-````
-./mysql_start.sh
-````
-3. After started MySQL server, then start Tomcat with Scada-LTS:
-````
-./tomcat_start.sh
-````
-4. If there is a problem with permissions, run the following command:
+1. Go to https://github.com/SCADA-LTS/linux-installer and select [releases](https://github.com/SCADA-LTS/linux-installer/releases) tab and then download latest release to desired folder.
+
+2. Go to location of downloaded installer and extract it.
+
+3. Start first script by using terminal and typing `./mysql_start.sh` inside extracted folder.  
+
+    Script will ask for some basic information to make configuration run correctly. Below is an example of the data that can be entered:  
+   * Port: 3306  
+   * Username: root  
+   * Password: root  
+   * root password: root  
+
+   After providing the information you should wait for the line confirming the correct setup of the database:  
+   `~/linux-installer-1.2.0/mysql/server/bin/mysqld: ready for connections. Version: '8.0.33'  socket: '/tmp/mysql.sock'  port: 3306  MySQL Community Server - GPL.`
+
+4. Start second terminal in the same folder and run `./tomcat_start.sh` script.
+
+    Similar to first script you will have to provide some information, example below:
+    * Enter port: 8080
+    * Enter username: tcuser
+    * Enter password: tcuser
+    * Enter database port: 3306
+    * Enter database username: root
+    * Enter database password: root
+
+    After that you should be able to access Scada-LTS via web browser by typing in search bar `localhost:8080/Scada-LTS`
+5. If there is a problem with permissions, run the following command:
 ````
 chmod +x linux-installer-1.x.x/**/*.sh
 chmod +x linux-installer-1.x.x/*.sh
