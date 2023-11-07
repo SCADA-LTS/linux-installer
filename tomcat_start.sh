@@ -20,15 +20,15 @@ CATALINA_WEBAPPS="$CATALINA_HOME/webapps"
 SCADA_LTS_HOME="${CATALINA_WEBAPPS}/Scada-LTS"
 
 if [ ! -d "${JAVA_BIN_DIR}" ]; then
-    ${JAVA_BASE}/java_install.sh $JAVA_HOME ${JAVA_VERSION} ${JAVA_UPDATE}
+    "${JAVA_BASE}"/java_install.sh "$JAVA_HOME" "${JAVA_VERSION}" "${JAVA_UPDATE}"
 fi
 
 if [ ! -d "${CATALINA_BIN_DIR}" ]; then
-    $CATALINA_BASE/tomcat_install.sh $CATALINA_HOME ${TOMCAT_MAJOR_VERSION} ${TOMCAT_MINOR_VERSION} ${TOMCAT_PATCH_VERSION}
+    "$CATALINA_BASE"/tomcat_install.sh "$CATALINA_HOME" ${TOMCAT_MAJOR_VERSION} ${TOMCAT_MINOR_VERSION} ${TOMCAT_PATCH_VERSION}
 fi
 
 if [ ! -d "${SCADA_LTS_HOME}" ]; then
-    $CATALINA_BASE/tomcat_config.sh $CATALINA_HOME
+    "$CATALINA_BASE"/tomcat_config.sh "$CATALINA_HOME"
 fi
 
-$CATALINA_HOME/bin/catalina.sh run
+"$CATALINA_HOME"/bin/catalina.sh run

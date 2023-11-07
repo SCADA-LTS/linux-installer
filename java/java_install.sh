@@ -14,24 +14,24 @@ SHELL_MYSQL_DEST=""
 if [ ${MACHINE_TYPE} == 'aarch64' ]; then
     echo "raspberry arm machine detected"
     JAVA_ARCH="OpenJDK11U-jdk_aarch64_linux_hotspot_"
-elif [ ${MACHINE_TYPE} == 'x86_64' ] || [ ${MACHINE_TYPE} == 'x64' ]; then
+elif [ "${MACHINE_TYPE}" == 'x86_64' ] || [ "${MACHINE_TYPE}" == 'x64' ]; then
     echo "64-bit machine detected"
     JAVA_ARCH="OpenJDK11U-jdk_x64_linux_hotspot_"
 else
     echo "x86 architecture, 32-bit is not supported"
 fi
 
-if [ ! -d ${JAVA_BIN_DIR} ] && [ ! -z ${JAVA_ARCH} ]; then
+if [ ! -d "${JAVA_BIN_DIR}" ] && [ ! -z ${JAVA_ARCH} ]; then
     JDK_TAR_GZ_FILE=${JAVA_ARCH}${JAVA_FULL_VERSION}".tar.gz"
-    mkdir -p $JAVA_HOME
+    mkdir -p "$JAVA_HOME"
     cd "$JAVA_HOME"
-    wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-${JAVA_VERSION_ENCODED}/${JDK_TAR_GZ_FILE}
-    tar -xvf ${JDK_TAR_GZ_FILE} -C "$JAVA_HOME"
+    wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-"${JAVA_VERSION_ENCODED}"/"${JDK_TAR_GZ_FILE}"
+    tar -xvf "${JDK_TAR_GZ_FILE}" -C "$JAVA_HOME"
     cd "$JAVA_HOME/${JDK_DEST}"
     mv * "$JAVA_HOME"
     cd ..
-    rm -rf ${JDK_DEST}
-    rm -f ${JDK_TAR_GZ_FILE}
+    rm -rf "${JDK_DEST}"
+    rm -f "${JDK_TAR_GZ_FILE}"
     echo "JDK version ${JAVA_FULL_VERSION} installed"
 fi
 

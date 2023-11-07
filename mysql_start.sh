@@ -13,10 +13,9 @@ BINDIR="$MYSQL_HOME/bin"
 
 MYSQLD_PID="$DATADIR/mysqld.pid"
 
-if [ ! -d ${BINDIR} ]; then
-    ${MYSQL_BASE}/mysql_install.sh ${MYSQL_MAJOR_VERSION} ${MYSQL_MINOR_VERSION} ${MYSQL_PATCH_VERSION}
+if [ ! -d "${BINDIR}" ]; then
+    "${MYSQL_BASE}"/mysql_install.sh ${MYSQL_MAJOR_VERSION} ${MYSQL_MINOR_VERSION} ${MYSQL_PATCH_VERSION}
 fi
 
-cd ${BINDIR}
-./mysqld --defaults-file=${MY_CNF} --datadir $DATADIR --pid-file=${MYSQLD_PID} --console
-
+cd "${BINDIR}"
+./mysqld --defaults-file="${MY_CNF}" --datadir "$DATADIR" --pid-file="${MYSQLD_PID}" --console
