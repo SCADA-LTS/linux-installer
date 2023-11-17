@@ -34,6 +34,7 @@ The installer requires an internet connection. The first run will take longer du
     * Enter username: tcuser
     * Enter password: tcuser
     * Enter database port: 3306
+    * Enter database host: localhost
     * Enter database username: root
     * Enter database password: root
 
