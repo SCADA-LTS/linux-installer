@@ -38,52 +38,47 @@ do
     echo -n "[Apache Tomcat Server] Enter port: "
     read -r CATALINA_PORT
 done
-sed -i "" -e "s/<Connector port=\"8080\"/<Connector port=\"${CATALINA_PORT}\"/" "${CATALINA_SERVER_XML}"
+"${JAVA_HOME}"/bin/java -jar replace-1.0.jar -o "<Connector port=\"8080\"" -n "<Connector port=\"${CATALINA_PORT}\"" -f "${CATALINA_SERVER_XML}"
 
-if [ -z "${CATALINA_USERNAME}" ] || [ -z "${CATALINA_PASSWORD}" ]; then
 
-  while [ -z "${CATALINA_USERNAME}" ] || ! [[ ${CATALINA_USERNAME} =~ ${USERNAME_REGEX} ]]
-  do
-    echo -n "[Apache Tomcat Server] Enter username: "
-    read -r CATALINA_USERNAME
-  done
+while [ -z "${CATALINA_USERNAME}" ] || ! [[ ${CATALINA_USERNAME} =~ ${USERNAME_REGEX} ]]
+do
+  echo -n "[Apache Tomcat Server] Enter username: "
+  read -r CATALINA_USERNAME
+done
 
-  while [ -z "${CATALINA_PASSWORD}" ]
-  do
-      echo -n "[Apache Tomcat Server] Enter password: "
-      read -r CATALINA_PASSWORD
-  done
-  "${JAVA_HOME}"/bin/java -jar replace-1.0.jar -o "</tomcat-users>" -n "<role rolename=\"monitoring\"/><role rolename=\"manager\"/><role rolename=\"manager-gui\"/><role rolename=\"admin\"/><role rolename=\"admin-script\"/><role rolename=\"admin-gui\"/><user username=\"${CATALINA_USERNAME}\" password=\"\" roles=\"admin,manager,manager-gui,monitoring,admin-script,admin-gui\"/></tomcat-users>" -f "${CATALINA_TOMCAT_USERS_XML}" -p ${CATALINA_PASSWORD}
-fi
+while [ -z "${CATALINA_PASSWORD}" ]
+do
+    echo -n "[Apache Tomcat Server] Enter password: "
+    read -r CATALINA_PASSWORD
+done
+"${JAVA_HOME}"/bin/java -jar replace-1.0.jar -o "</tomcat-users>" -n "<role rolename=\"monitoring\"/><role rolename=\"manager\"/><role rolename=\"manager-gui\"/><role rolename=\"admin\"/><role rolename=\"admin-script\"/><role rolename=\"admin-gui\"/><user username=\"${CATALINA_USERNAME}\" password=\"\" roles=\"admin,manager,manager-gui,monitoring,admin-script,admin-gui\"/></tomcat-users>" -f "${CATALINA_TOMCAT_USERS_XML}" -p ${CATALINA_PASSWORD}
 
 while [ ${DATABASE_PORT} -eq -1 ] || ! [[ ${DATABASE_PORT} =~ ${PORT_REGEX} ]]
 do
     echo -n "[Apache Tomcat Server] Enter database port: "
     read -r DATABASE_PORT
 done
-sed -i "" -e "s/jdbc:mysql:\/\/localhost:3308/jdbc:mysql:\/\/localhost:${DATABASE_PORT}/" "${CATALINA_CONTEXT_XML}"
 
 while [ -z "${DATABASE_HOSTNAME}" ] || ! [[ ${DATABASE_HOSTNAME} =~ $HOSTNAME_REGEX ]]
 do
     echo -n "[Apache Tomcat Server] Enter database host: "
     read -r DATABASE_HOSTNAME
 done
-sed -i "" -e "s/jdbc:mysql:\/\/localhost:${DATABASE_PORT}/jdbc:mysql:\/\/"${DATABASE_HOSTNAME}":${DATABASE_PORT}/" "${CATALINA_CONTEXT_XML}"
+"${JAVA_HOME}"/bin/java -jar replace-1.0.jar -o "jdbc:mysql://localhost:3308" -n "jdbc:mysql://${DATABASE_HOSTNAME}:${DATABASE_PORT}" -f "${CATALINA_CONTEXT_XML}"
 
-if [ -z "${DATABASE_USERNAME}" ] || [ -z "${DATABASE_PASSWORD}" ]; then
+while [ -z "${DATABASE_USERNAME}" ] || ! [[ ${DATABASE_USERNAME} =~ ${USERNAME_REGEX} ]]
+do
+  echo -n "[Apache Tomcat Server] Enter database username: "
+  read -r DATABASE_USERNAME
+done
+"${JAVA_HOME}"/bin/java -jar replace-1.0.jar -f -o "username=\"root\"" -n "username=\"${DATABASE_USERNAME}\"" -f "${CATALINA_CONTEXT_XML}"
 
-    while [ -z "${DATABASE_USERNAME}" ] || ! [[ ${DATABASE_USERNAME} =~ ${USERNAME_REGEX} ]]
-    do
-      echo -n "[Apache Tomcat Server] Enter database username: "
-      read -r DATABASE_USERNAME
-    done
-    sed -i "" -e "s/username=\"root\"/username=\"${DATABASE_USERNAME}\"/" "${CATALINA_CONTEXT_XML}"
+while [ -z "${DATABASE_PASSWORD}" ]
+do
+    echo -n "[Apache Tomcat Server] Enter database password: "
+    read -r DATABASE_PASSWORD
+done
+"${JAVA_HOME}"/bin/java -jar replace-1.0.jar -f "${CATALINA_CONTEXT_XML}" -p ${DATABASE_PASSWORD}
 
-    while [ -z "${DATABASE_PASSWORD}" ]
-    do
-        echo -n "[Apache Tomcat Server] Enter database password: "
-        read -r DATABASE_PASSWORD
-    done
-    "${JAVA_HOME}"/bin/java -jar replace-1.0.jar -f "${CATALINA_CONTEXT_XML}" -p ${DATABASE_PASSWORD}
-fi
 echo "Tomcat version ${TOMCAT_VERSION} configured"
