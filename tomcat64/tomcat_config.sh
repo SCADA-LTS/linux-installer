@@ -53,7 +53,7 @@ if [ -z "${CATALINA_USERNAME}" ] || [ -z "${CATALINA_PASSWORD}" ]; then
       echo -n "[Apache Tomcat Server] Enter password: "
       read -r CATALINA_PASSWORD
   done
-  java -jar replace-1.0.jar -o "</tomcat-users>" -n "<role rolename=\"monitoring\"/><role rolename=\"manager\"/><role rolename=\"manager-gui\"/><role rolename=\"admin\"/><role rolename=\"admin-script\"/><role rolename=\"admin-gui\"/><user username=\"${CATALINA_USERNAME}\" password=\"\" roles=\"admin,manager,manager-gui,monitoring,admin-script,admin-gui\"/></tomcat-users>" -f "${CATALINA_TOMCAT_USERS_XML}" -p ${CATALINA_PASSWORD}
+  "${JAVA_HOME}"/bin/java -jar replace-1.0.jar -o "</tomcat-users>" -n "<role rolename=\"monitoring\"/><role rolename=\"manager\"/><role rolename=\"manager-gui\"/><role rolename=\"admin\"/><role rolename=\"admin-script\"/><role rolename=\"admin-gui\"/><user username=\"${CATALINA_USERNAME}\" password=\"\" roles=\"admin,manager,manager-gui,monitoring,admin-script,admin-gui\"/></tomcat-users>" -f "${CATALINA_TOMCAT_USERS_XML}" -p ${CATALINA_PASSWORD}
 fi
 
 while [ ${DATABASE_PORT} -eq -1 ] || ! [[ ${DATABASE_PORT} =~ ${PORT_REGEX} ]]
@@ -84,6 +84,6 @@ if [ -z "${DATABASE_USERNAME}" ] || [ -z "${DATABASE_PASSWORD}" ]; then
         echo -n "[Apache Tomcat Server] Enter database password: "
         read -r DATABASE_PASSWORD
     done
-    java -jar replace-1.0.jar -f "${CATALINA_CONTEXT_XML}" -p ${DATABASE_PASSWORD}
+    "${JAVA_HOME}"/bin/java -jar replace-1.0.jar -f "${CATALINA_CONTEXT_XML}" -p ${DATABASE_PASSWORD}
 fi
 echo "Tomcat version ${TOMCAT_VERSION} configured"

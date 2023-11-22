@@ -102,14 +102,14 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
       echo -n "[MySQL Community Server] Enter hostname: "
       read -r MYSQL_HOST
     done
-    java -jar ../replace-1.0.jar -n "CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'${MYSQL_HOST}' IDENTIFIED BY '';GRANT ALL ON scadalts.* TO '${MYSQL_USERNAME}'@'${MYSQL_HOST}';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_PASSWORD}"
+    "${JAVA_HOME}"/bin/java -jar ../replace-1.0.jar -n "CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'${MYSQL_HOST}' IDENTIFIED BY '';GRANT ALL ON scadalts.* TO '${MYSQL_USERNAME}'@'${MYSQL_HOST}';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_PASSWORD}"
 
     while [ -z "${MYSQL_ROOT_PASSWORD}" ]
     do
       echo -n "[MySQL Community Server] Enter root password: "
       read -r MYSQL_ROOT_PASSWORD
     done
-    java -jar ../replace-1.0.jar -n "ALTER USER 'root'@'${MYSQL_HOST}' IDENTIFIED BY '';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_ROOT_PASSWORD}"
+    "${JAVA_HOME}"/bin/java -jar ../replace-1.0.jar -n "ALTER USER 'root'@'${MYSQL_HOST}' IDENTIFIED BY '';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_ROOT_PASSWORD}"
     echo "MySQL Community Server version ${MYSQL_VERSION} installed"
 fi
 
