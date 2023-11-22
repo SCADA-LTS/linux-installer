@@ -26,11 +26,21 @@ MACHINE_TYPE=`uname -m`
 SERVER_MYSQL_DEST=""
 SHELL_MYSQL_DEST=""
 
-FORBIDDEN_CHARS="[!@#\$%\^&\*\(\)]"
-NUMBER_REGEX='^[0-9]+$'
+PORT_REGEX='^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$'
+HOSTNAME_REGEX="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(localhost)|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$"
+USERNAME_REGEX='^[a-zA-Z0-9_-]+$'
 
-if [ "${MACHINE_TYPE}" == 'aarch64' ]; then
-    echo "raspberry arm machine detected"
+if ! command -v wget &> /dev/null
+then
+    echo "wget could not be found then MySQL Community Server version ${MYSQL_VERSION} installation stop"
+    exit 1
+fi
+
+if [ ${MACHINE_TYPE} == 'arm64' ]; then
+    echo "arm64 (Apple Silicon M1/M2) machine detected"
+    SERVER_MYSQL_DEST="mysql-${MYSQL_VERSION}-macos13-arm64"
+elif [ "${MACHINE_TYPE}" == 'aarch64' ]; then
+    echo "raspberry ARM machine detected"
     SERVER_MYSQL_DEST="mysql-${MYSQL_VERSION}-linux-glibc2.17-aarch64-minimal"
 elif [ "${MACHINE_TYPE}" == 'x86_64' ] || [ "${MACHINE_TYPE}" == 'x64' ]; then
     echo "64-bit machine detected"
@@ -43,55 +53,63 @@ fi
 if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
 
     SERVER_MSQL_TAR_FILE="${SERVER_MYSQL_DEST}.tar"
-    SERVER_MSQL_TAR_XZ_FILE="${SERVER_MYSQL_DEST}.tar.xz"
 
+    if [ ${MACHINE_TYPE} == 'arm64' ]; then
+        SERVER_MSQL_TAR_XZ_FILE="${SERVER_MYSQL_DEST}.tar.gz"
+    else
+        SERVER_MSQL_TAR_XZ_FILE="${SERVER_MYSQL_DEST}.tar.xz"
+    fi
     mkdir -p "$MYSQL_HOME"
     cd "$MYSQL_HOME"
-    wget "https://dev.mysql.com/get/Downloads/MySQL-${MYSQL_MAJOR_VERSION}.${MYSQL_MINOR_VERSION}/${SERVER_MSQL_TAR_FILE}"
+    if [ ! -f "$SERVER_MSQL_TAR_FILE" ]; then
+      wget "https://dev.mysql.com/get/Downloads/MySQL-${MYSQL_MAJOR_VERSION}.${MYSQL_MINOR_VERSION}/${SERVER_MSQL_TAR_FILE}"
+    fi
     tar -xvf "${SERVER_MSQL_TAR_FILE}" -C "$MYSQL_HOME"
     tar -xvf "${SERVER_MSQL_TAR_XZ_FILE}" -C "$MYSQL_HOME"
     cd "$MYSQL_HOME/${SERVER_MYSQL_DEST}"
     mv * "$MYSQL_HOME"
     cd ..
     rm -rf "${SERVER_MYSQL_DEST}"
-    rm -f "${SERVER_MSQL_TAR_FILE}"
+    #rm -f "${SERVER_MSQL_TAR_FILE}"
     rm -f *.tar.xz
-    cp -ar "${MY_CNF}" "${COPIED_MY_CNF}"
-    cp -ar "${INIT_SCHEMA}" "${COPIED_INIT_SCHEMA}"
+    rm -f *.tar.gz
+    cp -a "${MY_CNF}" "${COPIED_MY_CNF}"
+    cp -a "${INIT_SCHEMA}" "${COPIED_INIT_SCHEMA}"
 
-    NUMBER_REGEX='^[0-9]+$'
-    while [ ${MYSQL_PORT} -eq -1 ] || ! [[ ${MYSQL_PORT} =~ ${NUMBER_REGEX} ]]
+    while [ ${MYSQL_PORT} -eq -1 ] || ! [[ ${MYSQL_PORT} =~ ${PORT_REGEX} ]]
     do
       echo -n "[MySQL Community Server] Enter port: "
       read -r MYSQL_PORT
     done
     echo "port = ${MYSQL_PORT}" >> "${COPIED_MY_CNF}"
+    echo "mysqlx_port = 3${MYSQL_PORT}" >> "${COPIED_MY_CNF}"
 
-    if [ -z "${MYSQL_USERNAME}" ]; then
-        echo -n "[MySQL Community Server] Enter username: "
-        read -r MYSQL_USERNAME
-        echo "user = ${MYSQL_USERNAME}" >> "${COPIED_MY_CNF}"
-    fi
+    while [ -z "${MYSQL_USERNAME}" ] || ! [[ ${MYSQL_USERNAME} =~ ${USERNAME_REGEX} ]]
+    do
+      echo -n "[MySQL Community Server] Enter username: "
+      read -r MYSQL_USERNAME
+    done
+    echo "user = ${MYSQL_USERNAME}" >> "${COPIED_MY_CNF}"
 
-    if [ -z "${MYSQL_PASSWORD}" ]; then
-      while [ -z "${MYSQL_PASSWORD}" ] #|| [[ "${MYSQL_PASSWORD}" =~ ${FORBIDDEN_CHARS} ]]
-          do
-            echo -n "[MySQL Community Server] Enter password: "
-            read -r MYSQL_PASSWORD
-          done
-        echo $'\n'"CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'localhost' IDENTIFIED BY '${MYSQL_PASSWORD}';"$'\n'"GRANT ALL ON scadalts.* TO '${MYSQL_USERNAME}'@'localhost';"$'\n'"FLUSH PRIVILEGES;" >> "${COPIED_INIT_SCHEMA}"
-    fi
+    while [ -z "${MYSQL_PASSWORD}" ]
+    do
+      echo -n "[MySQL Community Server] Enter password: "
+      read -r MYSQL_PASSWORD
+    done
 
-    if [ -z "${MYSQL_ROOT_PASSWORD}" ]; then
-      while [ -z "${MYSQL_ROOT_PASSWORD}" ] #|| [[ ${MYSQL_ROOT_PASSWORD} =~ ${FORBIDDEN_CHARS} ]]
-          do
-              echo -n "[MySQL Community Server] Enter root password: "
-              read -r MYSQL_ROOT_PASSWORD
-          done
+    while [ -z "${MYSQL_HOST}" ] || ! [[ ${MYSQL_HOST} =~ ${HOSTNAME_REGEX} ]]
+    do
+      echo -n "[MySQL Community Server] Enter hostname: "
+      read -r MYSQL_HOST
+    done
+    java -jar ../replace-1.0.jar -n "CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'${MYSQL_HOST}' IDENTIFIED BY '';GRANT ALL ON scadalts.* TO '${MYSQL_USERNAME}'@'${MYSQL_HOST}';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_PASSWORD}"
 
-      echo $'\n'"ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"$'\n'"FLUSH PRIVILEGES;" >> "${COPIED_INIT_SCHEMA}"
-    fi
-
+    while [ -z "${MYSQL_ROOT_PASSWORD}" ]
+    do
+      echo -n "[MySQL Community Server] Enter root password: "
+      read -r MYSQL_ROOT_PASSWORD
+    done
+    java -jar ../replace-1.0.jar -n "ALTER USER 'root'@'${MYSQL_HOST}' IDENTIFIED BY '';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_ROOT_PASSWORD}"
     echo "MySQL Community Server version ${MYSQL_VERSION} installed"
 fi
 
@@ -101,7 +119,9 @@ if [ ! -d "${CLIENT_BIN_DIR}" ] && [ ! -z "${SHELL_MYSQL_DEST}" ]; then
 
     mkdir -p "$SHELL_HOME"
     cd "$SHELL_HOME"
-    wget "https://dev.mysql.com/get/Downloads/MySQL-Shell/${SHELL_MYSQL_TAR_GZ_FILE}"
+    if [ ! -f "$SHELL_MYSQL_TAR_GZ_FILE" ]; then
+      wget "https://dev.mysql.com/get/Downloads/MySQL-Shell/${SHELL_MYSQL_TAR_GZ_FILE}"
+    fi
     tar -xvf "${SHELL_MYSQL_TAR_GZ_FILE}" -C "$SHELL_HOME"
     cd "$SHELL_HOME/${SHELL_MYSQL_DEST}"
     mv * "$SHELL_HOME"

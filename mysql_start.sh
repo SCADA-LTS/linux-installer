@@ -17,5 +17,10 @@ if [ ! -d "${BINDIR}" ]; then
     "${MYSQL_BASE}"/mysql_install.sh ${MYSQL_MAJOR_VERSION} ${MYSQL_MINOR_VERSION} ${MYSQL_PATCH_VERSION}
 fi
 
+if [ ! -d "${BINDIR}" ]; then
+    echo "Not installed MySQL version ${MYSQL_MAJOR_VERSION}.${MYSQL_MINOR_VERSION}.${MYSQL_PATCH_VERSION} then running stop"
+    exit 1
+fi
+
 cd "${BINDIR}"
-./mysqld --defaults-file="${MY_CNF}" --datadir "$DATADIR" --pid-file="${MYSQLD_PID}" --console
+./mysqld --defaults-file="${MY_CNF}" --datadir "$DATADIR" --console
