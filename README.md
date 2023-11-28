@@ -44,3 +44,12 @@ The installer requires an internet connection. The first run will take longer du
 chmod +x linux-installer-1.x.x/**/*.sh
 chmod +x linux-installer-1.x.x/*.sh
 ````
+
+6. After restarting the system, we execute these two scripts similarly, in this order, first we start the installed database:
+````
+./mysql_start.sh
+````
+in the next step, we start the tomcat server:
+````
+./tomcat_start.sh
+````
