@@ -3,10 +3,10 @@
 # Installer Scada-LTS for linux
 | Technology | Version | Description |
 | :--- | :---: | --- |
-| Java | 11.0.19+7 | Base programic language |
-| Server MySQL CE | 8.0.33 | Database server for data persistence |
-| Shell MySQL | 8.0.33 | Database client |
-| Apache Tomcat | 9.0.76 | Application server |
+| Java | 11.0.22+7 | Base programic language |
+| Server MySQL CE | 8.0.36 | Database server for data persistence |
+| Shell MySQL | 8.0.36 | Database client |
+| Apache Tomcat | 9.0.86 | Application server |
 | Ubuntu/Mint | >=18 | System |
 
 ## Instruction 
