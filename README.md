@@ -41,8 +41,8 @@ The installer requires an internet connection. The first run will take longer du
     After that you should be able to access Scada-LTS via web browser by typing in search bar `localhost:8080/Scada-LTS`
 5. If there is a problem with permissions, run the following command:
 ````
-chmod +x linux-installer-x.x.x/**/*.sh
-chmod +x linux-installer-x.x.x/*.sh
+chmod +x Scada-LTS_vx.x.x.x_Beta_Installer_vx.x.x_Setup/**/*.sh
+chmod +x Scada-LTS_vx.x.x.x_Beta_Installer_vx.x.x_Setup/*.sh
 ````
 
 6. After restarting the system, we execute these two scripts similarly, in this order, first we start the installed database:
