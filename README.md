@@ -43,6 +43,7 @@ The installer requires an internet connection. The first run will take longer du
 ````
 chmod +x Scada-LTS_vx.x.x.x_Installer_vx.x.x_Setup/**/*.sh
 chmod +x Scada-LTS_vx.x.x.x_Installer_vx.x.x_Setup/*.sh
+chmod +x Scada-LTS_vx.x.x.x_Installer_vx.x.x_Setup/**/*.jar
 ````
 
 6. After restarting the system, we execute these two scripts similarly, in this order, first we start the installed database:
