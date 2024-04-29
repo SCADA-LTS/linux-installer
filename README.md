@@ -22,10 +22,10 @@ The installer requires an internet connection. The first run will take longer du
    * Port: 3306  
    * Username: root  
    * Password: root  
-   * root password: root  
+   * Root password: root  
 
    After providing the information you should wait for the line confirming the correct setup of the database:  
-   `~/linux-installer-1.2.0/mysql/server/bin/mysqld: ready for connections. Version: '8.0.33'  socket: '/tmp/mysql.sock'  port: 3306  MySQL Community Server - GPL.`
+   `~/linux-installer-1.2.0/mysql/server/bin/mysqld: ready for connections. Version: '8.0.x'  socket: '/tmp/mysql.sock'  port: 3306  MySQL Community Server - GPL.`
 
 4. Start second terminal in the same folder and run `./tomcat_start.sh` script.
 
@@ -41,8 +41,8 @@ The installer requires an internet connection. The first run will take longer du
     After that you should be able to access Scada-LTS via web browser by typing in search bar `localhost:8080/Scada-LTS`
 5. If there is a problem with permissions, run the following command:
 ````
-chmod +x linux-installer-1.x.x/**/*.sh
-chmod +x linux-installer-1.x.x/*.sh
+chmod +x linux-installer-x.x.x/**/*.sh
+chmod +x linux-installer-x.x.x/*.sh
 ````
 
 6. After restarting the system, we execute these two scripts similarly, in this order, first we start the installed database:
