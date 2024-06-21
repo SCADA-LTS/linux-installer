@@ -67,7 +67,13 @@ do
     echo -n "[Apache Tomcat Server] Enter database host: ";
     read -r DATABASE_HOSTNAME;
 done
-"${JAVA_HOME}"/bin/java -jar replace-1.0.jar -o "jdbc:mysql://localhost:3308" -n "jdbc:mysql://${DATABASE_HOSTNAME}:${DATABASE_PORT}" -f "${CATALINA_CONTEXT_XML}";
+
+while [ -z "${DATABASE_NAME}" ] || ! [[ ${DATABASE_NAME} =~ $DATABASE_NAME ]]
+do
+    echo -n "[Apache Tomcat Server] Enter database name: ";
+    read -r DATABASE_NAME;
+done
+"${JAVA_HOME}"/bin/java -jar replace-1.0.jar -o "jdbc:mysql://localhost:3308/scadalts" -n "jdbc:mysql://${DATABASE_HOSTNAME}:${DATABASE_PORT}/${DATABASE_NAME}" -f "${CATALINA_CONTEXT_XML}";
 
 while [ -z "${DATABASE_USERNAME}" ] || ! [[ ${DATABASE_USERNAME} =~ ${USERNAME_REGEX} ]]
 do

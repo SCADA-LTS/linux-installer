@@ -18,6 +18,8 @@ SERVER_BIN_DIR="$MYSQL_HOME/bin";
 CLIENT_BIN_DIR="$SHELL_HOME/bin";
 
 MYSQL_PORT=-1;
+MYSQL_HOST="";
+MYSQL_DATABASE=""
 MYSQL_USERNAME="";
 MYSQL_PASSWORD="";
 MYSQL_ROOT_PASSWORD="";
@@ -88,6 +90,12 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
     cp -a "${MY_CNF}" "${COPIED_MY_CNF}";
     cp -a "${INIT_SCHEMA}" "${COPIED_INIT_SCHEMA}";
 
+    while [ -z "${MYSQL_HOST}" ] || ! [[ ${MYSQL_HOST} =~ ${HOSTNAME_REGEX} ]]
+    do
+      echo -n "[MySQL Community Server] Enter hostname: ";
+      read -r MYSQL_HOST;
+    done
+
     while [ ${MYSQL_PORT} -eq -1 ] || ! [[ ${MYSQL_PORT} =~ ${PORT_REGEX} ]]
     do
       echo -n "[MySQL Community Server] Enter port: ";
@@ -95,6 +103,13 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
     done
     echo "port = ${MYSQL_PORT}" >> "${COPIED_MY_CNF}";
     echo "mysqlx_port = 3${MYSQL_PORT}" >> "${COPIED_MY_CNF}";
+
+    while [ -z "${MYSQL_DATABASE}" ]
+    do
+      echo -n "[MySQL Community Server] Enter database name: ";
+      read -r MYSQL_DATABASE;
+    done
+    "${JAVA_HOME}"/bin/java -jar ../replace-1.0.jar -o "CREATE DATABASE IF NOT EXISTS scadalts;" -n "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};" -f "${COPIED_INIT_SCHEMA}";
 
     while [ -z "${MYSQL_USERNAME}" ] || ! [[ ${MYSQL_USERNAME} =~ ${USERNAME_REGEX} ]]
     do
@@ -108,13 +123,7 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
       echo -n "[MySQL Community Server] Enter password: ";
       read -r MYSQL_PASSWORD;
     done
-
-    while [ -z "${MYSQL_HOST}" ] || ! [[ ${MYSQL_HOST} =~ ${HOSTNAME_REGEX} ]]
-    do
-      echo -n "[MySQL Community Server] Enter hostname: ";
-      read -r MYSQL_HOST;
-    done
-    "${JAVA_HOME}"/bin/java -jar ../replace-1.0.jar -n "CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'${MYSQL_HOST}' IDENTIFIED BY '';GRANT ALL ON scadalts.* TO '${MYSQL_USERNAME}'@'${MYSQL_HOST}';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_PASSWORD}";
+    "${JAVA_HOME}"/bin/java -jar ../replace-1.0.jar -n "CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'${MYSQL_HOST}' IDENTIFIED BY '';GRANT ALL ON ${MYSQL_DATABASE}.* TO '${MYSQL_USERNAME}'@'${MYSQL_HOST}';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_PASSWORD}";
 
     while [ -z "${MYSQL_ROOT_PASSWORD}" ]
     do
@@ -134,7 +143,7 @@ if [ ! -d "${CLIENT_BIN_DIR}" ] && [ ! -z "${SHELL_MYSQL_DEST}" ]; then
     if [ ! -f "$SHELL_MYSQL_TAR_GZ_FILE" ]; then
       wget "https://dev.mysql.com/get/Downloads/MySQL-Shell/${SHELL_MYSQL_TAR_GZ_FILE}";
     fi
-    tar -xvf "${SHELL_MYSQL_TAR_GZ_FILE}" -C "$SHELL_HOME";
+    tar -xf "${SHELL_MYSQL_TAR_GZ_FILE}" -C "$SHELL_HOME";
     cd "$SHELL_HOME/${SHELL_MYSQL_DEST}";
     mv * "$SHELL_HOME";
     cd ..;
