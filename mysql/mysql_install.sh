@@ -109,7 +109,7 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
       echo -n "[MySQL Community Server] Enter database name: ";
       read -r MYSQL_DATABASE;
     done
-    "${JAVA_HOME}"/bin/java -jar ../replace-1.0.jar -o "CREATE DATABASE IF NOT EXISTS scadalts;" -n "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};" -f "${COPIED_INIT_SCHEMA}";
+    "${JAVA_HOME}"/bin/java -jar ../replace-1.0.jar -o "CREATE DATABASE IF NOT EXISTS scadalts;" -n "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;" -f "${COPIED_INIT_SCHEMA}";
 
     while [ -z "${MYSQL_USERNAME}" ] || ! [[ ${MYSQL_USERNAME} =~ ${USERNAME_REGEX} ]]
     do
@@ -123,7 +123,7 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
       echo -n "[MySQL Community Server] Enter password: ";
       read -r MYSQL_PASSWORD;
     done
-    "${JAVA_HOME}"/bin/java -jar ../replace-1.0.jar -n "CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'${MYSQL_HOST}' IDENTIFIED BY '';GRANT ALL ON ${MYSQL_DATABASE}.* TO '${MYSQL_USERNAME}'@'${MYSQL_HOST}';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_PASSWORD}";
+    "${JAVA_HOME}"/bin/java -jar ../replace-1.0.jar -n "CREATE USER IF NOT EXISTS '${MYSQL_USERNAME}'@'${MYSQL_HOST}' IDENTIFIED BY '';GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO '${MYSQL_USERNAME}'@'${MYSQL_HOST}';FLUSH PRIVILEGES;" -f "${COPIED_INIT_SCHEMA}" -d "mysql" -p "${MYSQL_PASSWORD}";
 
     while [ -z "${MYSQL_ROOT_PASSWORD}" ]
     do
