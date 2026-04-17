@@ -55,7 +55,44 @@ chmod +x Scada-LTS_vx.x.x.x_Installer_vx.x.x_Setup/*.sh
 chmod +x Scada-LTS_vx.x.x.x_Installer_vx.x.x_Setup/**/*.jar
 ````
 
-6. After restarting the system, we execute these two scripts similarly, in this order, first we start the installed database:
+6. ❗ If there is MySQL error: `libaio.so.1: cannot open shared object file`
+
+When starting MySQL, the following error may appear:
+
+```text
+error while loading shared libraries: libaio.so.1: cannot open shared object file: No such file or directory
+```
+
+**Cause**
+
+The system is missing the expected libaio.so.1 library.
+
+On newer Linux distributions (especially ARM / aarch64), the library may exist under a different name, e.g.:
+
+```text
+libaio.so.1t64
+```
+
+**Solution**
+
+Check available libaio libraries
+
+```bash
+ldconfig -p | grep libaio
+```
+
+Example output:
+
+```text
+libaio.so.1t64 (libc6,AArch64) => /lib/aarch64-linux-gnu/libaio.so.1t64
+```
+
+Use the path from the previous command and create a symbolic link:
+```bash
+sudo ln -s /lib/aarch64-linux-gnu/libaio.so.1t64 /lib/aarch64-linux-gnu/libaio.so.1
+```
+
+7. After restarting the system, we execute these two scripts similarly, in this order, first we start the installed database:
 ````
 ./mysql_start.sh
 ````
