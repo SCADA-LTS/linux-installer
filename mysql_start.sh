@@ -7,11 +7,11 @@ INSTALLER_HOME=$(dirname "$(realpath "$0")");
 MYSQL_BASE="${INSTALLER_HOME}/mysql";
 
 export MYSQL_HOME="${MYSQL_BASE}/server";
-export DATADIR="${MYSQL_BASE}/data";
+export DATADIR="$MYSQL_HOME/data";
 MY_CNF="$MYSQL_HOME/my.cnf";
 BINDIR="$MYSQL_HOME/bin";
 MY_CNF_REL="../my.cnf";
-DATADIR_REL="../../data";
+DATADIR_REL="../data";
 
 MYSQLD_PID="$DATADIR/mysqld.pid";
 
@@ -41,19 +41,10 @@ validate_mysql_data_dir() {
     fi
 
     configured_datadir=$(get_configured_datadir "${MY_CNF}");
-    if [ -z "${configured_datadir}" ]; then
-        echo "MySQL configuration does not define datadir in: ${MY_CNF}";
-        echo "Expected datadir: ${DATADIR}";
-        return 1;
-    fi
-
-    if [ "${configured_datadir}" != "${DATADIR}" ]; then
+    if [ -n "${configured_datadir}" ] && [ "${configured_datadir}" != "${DATADIR}" ]; then
         echo "MySQL configuration points to a different data directory";
         echo "Configured in my.cnf: ${configured_datadir}";
         echo "Expected by installer: ${DATADIR}";
-        if [ -d "${MYSQL_HOME}/data" ]; then
-            echo "Detected stale server-local directory: ${MYSQL_HOME}/data";
-        fi
         return 1;
     fi
 
