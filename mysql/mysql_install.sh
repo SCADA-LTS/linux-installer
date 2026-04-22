@@ -8,7 +8,7 @@ MYSQL_VERSION="${MYSQL_MAJOR_VERSION}.${MYSQL_MINOR_VERSION}.${MYSQL_PATCH_VERSI
 MYSQL_INSTALLER_HOME=$(dirname "$(realpath "$0")");
 export MYSQL_HOME="${MYSQL_INSTALLER_HOME}/server";
 export SHELL_HOME="${MYSQL_INSTALLER_HOME}/client";
-export DATADIR="$MYSQL_HOME/data";
+export DATADIR="${MYSQL_INSTALLER_HOME}/data";
 
 INIT_SCHEMA="${MYSQL_INSTALLER_HOME}/scadalts.sql";
 COPIED_INIT_SCHEMA="$MYSQL_HOME/scadalts.sql";
@@ -16,6 +16,9 @@ MY_CNF="${MYSQL_INSTALLER_HOME}/my.cnf";
 COPIED_MY_CNF="$MYSQL_HOME/my.cnf";
 SERVER_BIN_DIR="$MYSQL_HOME/bin";
 CLIENT_BIN_DIR="$SHELL_HOME/bin";
+MY_CNF_REL="../my.cnf";
+DATADIR_REL="../../data";
+INIT_SCHEMA_REL="../scadalts.sql";
 
 MYSQL_PORT=-1;
 MYSQL_HOST="";
@@ -32,6 +35,33 @@ SHELL_MYSQL_DEST="";
 PORT_REGEX='^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$';
 HOSTNAME_REGEX="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(localhost)|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$";
 USERNAME_REGEX='^[a-zA-Z0-9_-]+$';
+
+is_directory_empty() {
+    [ -z "$(ls -A "$1" 2>/dev/null)" ];
+}
+
+is_valid_mysql_datadir() {
+    local datadir="$1";
+
+    [ -d "${datadir}" ] || return 1;
+    [ -d "${datadir}/mysql" ] || return 1;
+    [ -f "${datadir}/auto.cnf" ] || return 1;
+}
+
+get_configured_datadir() {
+    sed -n 's/^[[:space:]]*datadir[[:space:]]*=[[:space:]]*//p' "$1" | tail -n 1;
+}
+
+set_configured_datadir() {
+    local config_file="$1";
+    local datadir="$2";
+
+    if grep -Eq '^[[:space:]]*datadir[[:space:]]*=' "${config_file}"; then
+        sed -i "s|^[[:space:]]*datadir[[:space:]]*=.*$|datadir         = ${datadir}|" "${config_file}";
+    else
+        printf '\ndatadir         = %s\n' "${datadir}" >> "${config_file}";
+    fi
+}
 
 if ! command -v wget &> /dev/null
 then
@@ -89,6 +119,7 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
 
     cp -a "${MY_CNF}" "${COPIED_MY_CNF}";
     cp -a "${INIT_SCHEMA}" "${COPIED_INIT_SCHEMA}";
+    set_configured_datadir "${COPIED_MY_CNF}" "${DATADIR}";
 
     while [ -z "${MYSQL_HOST}" ] || ! [[ ${MYSQL_HOST} =~ ${HOSTNAME_REGEX} ]]
     do
@@ -116,7 +147,6 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
       echo -n "[MySQL Community Server] Enter username: ";
       read -r MYSQL_USERNAME;
     done
-    echo "user = ${MYSQL_USERNAME}" >> "${COPIED_MY_CNF}";
 
     while [ -z "${MYSQL_PASSWORD}" ]
     do
@@ -152,9 +182,30 @@ if [ ! -d "${CLIENT_BIN_DIR}" ] && [ ! -z "${SHELL_MYSQL_DEST}" ]; then
     echo "MySQL Shell version ${MYSQL_VERSION} installed";
 fi
 
-if [ -d "${SERVER_BIN_DIR}" ] && [ ! -d "$DATADIR" ]; then
-  mkdir -p "$DATADIR";
-  cd "${SERVER_BIN_DIR}";
-  ./mysqld --defaults-file="$MYSQL_HOME/my.cnf" --initialize-insecure --datadir "$DATADIR" --user="${MYSQL_USERNAME}" --init-file="${COPIED_INIT_SCHEMA}" --console;
-  echo "MySQL Community Server version ${MYSQL_VERSION} configured";
+if [ -d "${SERVER_BIN_DIR}" ]; then
+  CONFIGURED_DATADIR=$(get_configured_datadir "${COPIED_MY_CNF}");
+  if [ "${CONFIGURED_DATADIR}" != "${DATADIR}" ]; then
+    echo "MySQL configuration points to a different data directory";
+    echo "Configured in my.cnf: ${CONFIGURED_DATADIR:-<not set>}";
+    echo "Expected by installer: ${DATADIR}";
+    echo "Fix mysql/server/my.cnf or remove stale installer files and rerun installation";
+    exit 1;
+  fi
+
+  if is_valid_mysql_datadir "$DATADIR"; then
+    echo "MySQL Community Server version ${MYSQL_VERSION} already configured";
+  elif [ -d "$DATADIR" ] && ! is_directory_empty "$DATADIR"; then
+    echo "Existing MySQL data directory is incomplete or invalid: $DATADIR";
+    echo "Remove or repair the directory and rerun installation";
+    exit 1;
+  else
+    mkdir -p "$DATADIR";
+    cd "${SERVER_BIN_DIR}";
+    ./mysqld --defaults-file="${MY_CNF_REL}" --initialize-insecure --datadir "${DATADIR_REL}" --init-file="${INIT_SCHEMA_REL}" --console;
+    if [ $? -ne 0 ] || ! is_valid_mysql_datadir "$DATADIR"; then
+      echo "MySQL data directory initialization failed: $DATADIR";
+      exit 1;
+    fi
+    echo "MySQL Community Server version ${MYSQL_VERSION} configured";
+  fi
 fi
