@@ -20,6 +20,7 @@ CATALINA_CONTEXT_XML="${SCADA_LTS_HOME}/META-INF/context.xml";
 CATALINA_PORT=-1;
 CATALINA_USERNAME="";
 CATALINA_PASSWORD="";
+USE_DEFAULT_CONFIGURATION="";
 
 DATABASE_PORT=-1;
 DATABASE_USERNAME="";
@@ -35,6 +36,29 @@ unzip -q "Scada-LTS.war" -d "${SCADA_LTS_HOME}";
 cp -af context.xml "${CATALINA_CONTEXT_XML}";
 cp -af "${CATALINA_BASE}"/lib/*.jar "${CATALINA_LIB}";
 cp -a setenv.sh "${CATALINA_BIN_DIR}";
+
+while [ -z "${USE_DEFAULT_CONFIGURATION}" ]
+do
+    echo -n "[Apache Tomcat Server] Use default configuration values? [Y/n]: ";
+    read -r USE_DEFAULT_CONFIGURATION;
+
+    if [ -z "${USE_DEFAULT_CONFIGURATION}" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "Y" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "y" ]; then
+        USE_DEFAULT_CONFIGURATION="Y";
+        CATALINA_PORT=8080;
+        CATALINA_USERNAME="tcuser";
+        CATALINA_PASSWORD="tcuser";
+        DATABASE_PORT=3306;
+        DATABASE_HOSTNAME="localhost";
+        DATABASE_NAME="scadalts";
+        DATABASE_USERNAME="root";
+        DATABASE_PASSWORD="root";
+    elif [ "${USE_DEFAULT_CONFIGURATION}" = "N" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "n" ]; then
+        USE_DEFAULT_CONFIGURATION="N";
+    else
+        USE_DEFAULT_CONFIGURATION="";
+        echo "[Apache Tomcat Server] Please answer Y or n.";
+    fi
+done
 
 while [ ${CATALINA_PORT} -eq -1 ] || ! [[ ${CATALINA_PORT} =~ ${PORT_REGEX} ]]
 do

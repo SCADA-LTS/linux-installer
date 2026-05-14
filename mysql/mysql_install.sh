@@ -23,6 +23,7 @@ MYSQL_DATABASE=""
 MYSQL_USERNAME="";
 MYSQL_PASSWORD="";
 MYSQL_ROOT_PASSWORD="";
+USE_DEFAULT_CONFIGURATION="";
 
 MACHINE_TYPE=$(uname -m);
 
@@ -89,6 +90,27 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
 
     cp -a "${MY_CNF}" "${COPIED_MY_CNF}";
     cp -a "${INIT_SCHEMA}" "${COPIED_INIT_SCHEMA}";
+
+    while [ -z "${USE_DEFAULT_CONFIGURATION}" ]
+    do
+      echo -n "[MySQL Community Server] Use default configuration values? [Y/n]: ";
+      read -r USE_DEFAULT_CONFIGURATION;
+
+      if [ -z "${USE_DEFAULT_CONFIGURATION}" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "Y" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "y" ]; then
+        USE_DEFAULT_CONFIGURATION="Y";
+        MYSQL_HOST="localhost";
+        MYSQL_PORT=3306;
+        MYSQL_DATABASE="scadalts";
+        MYSQL_USERNAME="root";
+        MYSQL_PASSWORD="root";
+        MYSQL_ROOT_PASSWORD="root";
+      elif [ "${USE_DEFAULT_CONFIGURATION}" = "N" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "n" ]; then
+        USE_DEFAULT_CONFIGURATION="N";
+      else
+        USE_DEFAULT_CONFIGURATION="";
+        echo "[MySQL Community Server] Please answer Y or n.";
+      fi
+    done
 
     while [ -z "${MYSQL_HOST}" ] || ! [[ ${MYSQL_HOST} =~ ${HOSTNAME_REGEX} ]]
     do
