@@ -6,6 +6,7 @@ JAVA_HOME=$4;
 
 MYSQL_VERSION="${MYSQL_MAJOR_VERSION}.${MYSQL_MINOR_VERSION}.${MYSQL_PATCH_VERSION}";
 MYSQL_INSTALLER_HOME=$(dirname "$(realpath "$0")");
+CONFIG_FILE="${INSTALLER_CONFIG:-${MYSQL_INSTALLER_HOME}/../installer.properties}";
 export MYSQL_HOME="${MYSQL_INSTALLER_HOME}/server";
 export SHELL_HOME="${MYSQL_INSTALLER_HOME}/client";
 export DATADIR="$MYSQL_HOME/data";
@@ -33,6 +34,24 @@ SHELL_MYSQL_DEST="";
 PORT_REGEX='^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$';
 HOSTNAME_REGEX="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(localhost)|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$";
 USERNAME_REGEX='^[a-zA-Z0-9_-]+$';
+
+read_property() {
+    local key="$1";
+    local default_value="$2";
+    local value="";
+
+    if [ -f "${CONFIG_FILE}" ]; then
+        value=$(grep -E "^[[:space:]]*${key}[[:space:]]*=" "${CONFIG_FILE}" | tail -n 1 | cut -d '=' -f 2-);
+        value="${value#"${value%%[![:space:]]*}"}";
+        value="${value%"${value##*[![:space:]]}"}";
+    fi
+
+    if [ -n "${value}" ]; then
+        printf '%s' "${value}";
+    else
+        printf '%s' "${default_value}";
+    fi
+}
 
 if ! command -v wget &> /dev/null
 then
@@ -98,12 +117,12 @@ if [ ! -d "${SERVER_BIN_DIR}" ] && [ ! -z "${SERVER_MYSQL_DEST}" ]; then
 
       if [ -z "${USE_DEFAULT_CONFIGURATION}" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "Y" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "y" ]; then
         USE_DEFAULT_CONFIGURATION="Y";
-        MYSQL_HOST="localhost";
-        MYSQL_PORT=3306;
-        MYSQL_DATABASE="scadalts";
-        MYSQL_USERNAME="root";
-        MYSQL_PASSWORD="root";
-        MYSQL_ROOT_PASSWORD="root";
+        MYSQL_HOST=$(read_property "MYSQL_HOST" "localhost");
+        MYSQL_PORT=$(read_property "MYSQL_PORT" "3306");
+        MYSQL_DATABASE=$(read_property "MYSQL_DATABASE" "scadalts");
+        MYSQL_USERNAME=$(read_property "MYSQL_USERNAME" "root");
+        MYSQL_PASSWORD=$(read_property "MYSQL_PASSWORD" "root");
+        MYSQL_ROOT_PASSWORD=$(read_property "MYSQL_ROOT_PASSWORD" "root");
       elif [ "${USE_DEFAULT_CONFIGURATION}" = "N" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "n" ]; then
         USE_DEFAULT_CONFIGURATION="N";
       else

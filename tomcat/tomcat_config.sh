@@ -3,6 +3,8 @@ CATALINA_HOME="$1";
 TOMCAT_VERSION="$2";
 JAVA_HOME="$3";
 CATALINA_BIN_DIR="${CATALINA_HOME}/bin";
+TOMCAT_INSTALLER_HOME=$(dirname "$(realpath "$0")");
+CONFIG_FILE="${INSTALLER_CONFIG:-${TOMCAT_INSTALLER_HOME}/../installer.properties}";
 
 echo "${JAVA_HOME}";
 
@@ -26,10 +28,29 @@ DATABASE_PORT=-1;
 DATABASE_USERNAME="";
 DATABASE_PASSWORD="";
 DATABASE_HOSTNAME="";
+DATABASE_NAME="";
 
 PORT_REGEX="^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$";
 HOSTNAME_REGEX="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(localhost)|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$";
 USERNAME_REGEX="^[a-zA-Z0-9_-]+$";
+
+read_property() {
+    local key="$1";
+    local default_value="$2";
+    local value="";
+
+    if [ -f "${CONFIG_FILE}" ]; then
+        value=$(grep -E "^[[:space:]]*${key}[[:space:]]*=" "${CONFIG_FILE}" | tail -n 1 | cut -d '=' -f 2-);
+        value="${value#"${value%%[![:space:]]*}"}";
+        value="${value%"${value##*[![:space:]]}"}";
+    fi
+
+    if [ -n "${value}" ]; then
+        printf '%s' "${value}";
+    else
+        printf '%s' "${default_value}";
+    fi
+}
 
 cd "${CATALINA_BASE}";
 unzip -q "Scada-LTS.war" -d "${SCADA_LTS_HOME}";
@@ -44,14 +65,14 @@ do
 
     if [ -z "${USE_DEFAULT_CONFIGURATION}" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "Y" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "y" ]; then
         USE_DEFAULT_CONFIGURATION="Y";
-        CATALINA_PORT=8080;
-        CATALINA_USERNAME="tcuser";
-        CATALINA_PASSWORD="tcuser";
-        DATABASE_PORT=3306;
-        DATABASE_HOSTNAME="localhost";
-        DATABASE_NAME="scadalts";
-        DATABASE_USERNAME="root";
-        DATABASE_PASSWORD="root";
+        CATALINA_PORT=$(read_property "TOMCAT_PORT" "8080");
+        CATALINA_USERNAME=$(read_property "TOMCAT_USERNAME" "tcuser");
+        CATALINA_PASSWORD=$(read_property "TOMCAT_PASSWORD" "tcuser");
+        DATABASE_PORT=$(read_property "DATABASE_PORT" "3306");
+        DATABASE_HOSTNAME=$(read_property "DATABASE_HOST" "localhost");
+        DATABASE_NAME=$(read_property "DATABASE_NAME" "scadalts");
+        DATABASE_USERNAME=$(read_property "DATABASE_USERNAME" "root");
+        DATABASE_PASSWORD=$(read_property "DATABASE_PASSWORD" "root");
     elif [ "${USE_DEFAULT_CONFIGURATION}" = "N" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "n" ]; then
         USE_DEFAULT_CONFIGURATION="N";
     else
