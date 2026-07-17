@@ -5,9 +5,9 @@
 | Technology |  Version   | Description |
 | :--- |:----------:| --- |
 | Java | 17.0.19+10 | Base programic language |
-| Server MySQL CE |   8.0.36   | Database server for data persistence |
-| Shell MySQL |   8.0.36   | Database client |
-| Apache Tomcat |   9.0.86   | Application server |
+| Server MySQL CE |   8.0.46   | Database server for data persistence |
+| Shell MySQL |   8.0.46   | Database client |
+| Apache Tomcat |  9.0.120   | Application server |
 | Ubuntu/Mint |    >=18    | System |
 
 ## Instruction 
