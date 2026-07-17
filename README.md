@@ -2,13 +2,13 @@
 <img src="https://github.com/user-attachments/assets/d06d59a1-0162-4b22-993e-8f9a8d5b638c" width=30% height=30%>
 
 # Installer Scada-LTS for linux
-| Technology | Version | Description |
-| :--- | :---: | --- |
-| Java | 11.0.22+7 | Base programic language |
-| Server MySQL CE | 8.0.36 | Database server for data persistence |
-| Shell MySQL | 8.0.36 | Database client |
-| Apache Tomcat | 9.0.86 | Application server |
-| Ubuntu/Mint | >=18 | System |
+| Technology |  Version   | Description |
+| :--- |:----------:| --- |
+| Java | 17.0.19+10 | Base programic language |
+| Server MySQL CE |   8.0.36   | Database server for data persistence |
+| Shell MySQL |   8.0.36   | Database client |
+| Apache Tomcat |   9.0.86   | Application server |
+| Ubuntu/Mint |    >=18    | System |
 
 ## Instruction 
 The installer requires an internet connection. The first run will take longer due to the need to download and install MySQL 8.0 CE database server, MySQL 8.0 shell and JDK 11.
