@@ -3,6 +3,10 @@ CATALINA_HOME="$1";
 TOMCAT_VERSION="$2";
 JAVA_HOME="$3";
 CATALINA_BIN_DIR="${CATALINA_HOME}/bin";
+TOMCAT_INSTALLER_HOME=$(dirname "$(realpath "$0")");
+CONFIG_FILE="${INSTALLER_CONFIG:-${TOMCAT_INSTALLER_HOME}/tomcat.properties}";
+
+. ./utils/read_property.sh;
 
 echo "${JAVA_HOME}";
 
@@ -20,11 +24,13 @@ CATALINA_CONTEXT_XML="${SCADA_LTS_HOME}/META-INF/context.xml";
 CATALINA_PORT=-1;
 CATALINA_USERNAME="";
 CATALINA_PASSWORD="";
+USE_DEFAULT_CONFIGURATION="";
 
 DATABASE_PORT=-1;
 DATABASE_USERNAME="";
 DATABASE_PASSWORD="";
 DATABASE_HOSTNAME="";
+DATABASE_NAME="";
 
 PORT_REGEX="^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$";
 HOSTNAME_REGEX="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(localhost)|^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])$";
@@ -35,6 +41,29 @@ unzip -q "Scada-LTS.war" -d "${SCADA_LTS_HOME}";
 cp -af context.xml "${CATALINA_CONTEXT_XML}";
 cp -af "${CATALINA_BASE}"/lib/*.jar "${CATALINA_LIB}";
 cp -a setenv.sh "${CATALINA_BIN_DIR}";
+
+while [ -z "${USE_DEFAULT_CONFIGURATION}" ]
+do
+    echo -n "[Apache Tomcat Server] Use default configuration values? [Y/n]: ";
+    read -r USE_DEFAULT_CONFIGURATION;
+
+    if [ -z "${USE_DEFAULT_CONFIGURATION}" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "Y" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "y" ]; then
+        USE_DEFAULT_CONFIGURATION="Y";
+        CATALINA_PORT=$(read_property "${CONFIG_FILE}" "tomcat.port");
+        CATALINA_USERNAME=$(read_property "${CONFIG_FILE}" "tomcat.username");
+        CATALINA_PASSWORD=$(read_property "${CONFIG_FILE}" "tomcat.password");
+        DATABASE_PORT=$(read_property "${CONFIG_FILE}" "tomcat.database.port");
+        DATABASE_HOSTNAME=$(read_property "${CONFIG_FILE}" "tomcat.database.host");
+        DATABASE_NAME=$(read_property "${CONFIG_FILE}" "tomcat.database.name");
+        DATABASE_USERNAME=$(read_property "${CONFIG_FILE}" "tomcat.database.username");
+        DATABASE_PASSWORD=$(read_property "${CONFIG_FILE}" "tomcat.database.password");
+    elif [ "${USE_DEFAULT_CONFIGURATION}" = "N" ] || [ "${USE_DEFAULT_CONFIGURATION}" = "n" ]; then
+        USE_DEFAULT_CONFIGURATION="N";
+    else
+        USE_DEFAULT_CONFIGURATION="";
+        echo "[Apache Tomcat Server] Please answer Y or n.";
+    fi
+done
 
 while [ ${CATALINA_PORT} -eq -1 ] || ! [[ ${CATALINA_PORT} =~ ${PORT_REGEX} ]]
 do
@@ -80,7 +109,7 @@ do
   echo -n "[Apache Tomcat Server] Enter database username: ";
   read -r DATABASE_USERNAME;
 done
-"${JAVA_HOME}"/bin/java -jar replace-1.0.jar -f -o "username=\"root\"" -n "username=\"${DATABASE_USERNAME}\"" -f "${CATALINA_CONTEXT_XML}";
+"${JAVA_HOME}"/bin/java -jar replace-1.0.jar -o "username=\"root\"" -n "username=\"${DATABASE_USERNAME}\"" -f "${CATALINA_CONTEXT_XML}";
 
 while [ -z "${DATABASE_PASSWORD}" ]
 do
